@@ -1,0 +1,1398 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title class="dynamic-app-name">KHELO ESPORTS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', 'Hind Siliguri', sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #f7f5fa; display: flex; justify-content: center; color: #111; }
+        #app { width: 100%; max-width: 450px; height: 100vh; background-color: #f7f5fa; position: relative; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
+        .scrollable-content { height: calc(100vh - 60px); overflow-y: auto; padding-bottom: 20px; transition: 0.3s; }
+        .scrollable-content::-webkit-scrollbar { display: none; }
+        .hidden { display: none !important; }
+
+        /* --- Loading Screen (Light Theme) --- */
+        #initial-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #f4f6f9; z-index: 9999; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+        .app-logo-large { width: 120px; height: 120px; border-radius: 15px; margin-bottom: 15px; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.1); background: #fff;}
+        .app-logo-large img { width: 100%; height: 100%; object-fit: contain; border-radius: 15px;}
+        .spinner { border: 4px solid rgba(0,0,0,0.1); border-top: 4px solid #1a237e; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-top:20px; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* --- Header & Layout --- */
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 15px; background: #ffffff; font-weight: 800; color: #000; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 10; }
+        .header i { font-size: 20px; cursor: pointer; color: #000; }
+        
+        .bottom-nav { position: absolute; bottom: 0; width: 100%; height: 60px; background-color: #ffffff; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -2px 15px rgba(0,0,0,0.08); z-index: 100; border-top: 1px solid #eee; }
+        .nav-item { position: relative; display: flex; flex-direction: column; align-items: center; color: #888; font-size: 10px; cursor: pointer; width: 20%; transition: 0.3s; font-weight: 700; }
+        .nav-item i { font-size: 20px; margin-bottom: 4px; transition: 0.3s; }
+        .nav-item.active { color: #6a1b9a; font-weight: 800; }
+        .nav-item.active i { transform: translateY(-2px); }
+        .nav-badge { position: absolute; top: -5px; right: 15px; background: #d32f2f; color: #fff; font-size: 9px; width: 16px; height: 16px; border-radius: 50%; display: none; justify-content: center; align-items: center; font-weight: bold; border: 2px solid #fff;}
+
+        /* --- Floating Support Icon --- */
+        .floating-support { position: fixed; bottom: 80px; right: 20px; width: 55px; height: 55px; background: #fff; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2); z-index: 90; cursor: pointer; border: 2px solid #e1bee7; animation: bounce 2s infinite; }
+        .floating-support img { width: 60%; height: 60%; object-fit: contain; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+        /* --- Native CSS Slider --- */
+        .slider-wrapper { background: #ffffff; } 
+        .slider-container { position: relative; width: 100%; height: 180px; overflow: hidden; }
+        .slider { display: flex; width: 100%; height: 100%; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; }
+        .slider::-webkit-scrollbar { display: none; }
+        .slide { min-width: 100%; height: 100%; scroll-snap-align: start; background-size: cover; background-position: center; pointer-events: auto; cursor: pointer; }
+        .dots { position: absolute; bottom: 10px; width: 100%; display: flex; justify-content: center; gap: 6px; pointer-events: none; }
+        .dot { width: 8px; height: 8px; background-color: rgba(255,255,255,0.5); border-radius: 50%; transition: 0.3s; }
+        .dot.active { background-color: #ff9800; width: 16px; border-radius: 4px; }
+        
+        .notice-bar { background-color: #fff; padding: 10px 15px; color: #000000; font-size: 14px; font-weight: 800; border-bottom: 1px solid #eee; }
+        .notice-bar marquee { display: block; width: 100%; }
+        
+        .section-title { text-align: center; font-size: 16px; font-weight: 800; color: #444; margin: 20px 0 15px; letter-spacing: 1px; text-transform: uppercase;}
+        
+        .category-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; padding: 0 15px; }
+        .cat-card { background: #fff5f8; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.06); border: 1px solid #f8bbd0; cursor: pointer; }
+        .cat-card img { width: 100%; height: 90px; object-fit: cover; }
+        .cat-info { padding: 10px; text-align: left; }
+        .cat-info h3 { font-size: 14px; color: #111; font-weight: 800; text-transform: uppercase;}
+        .cat-info p { font-size: 11px; color: #777; font-weight: 700; margin-top: 2px;}
+
+        /* --- Matches & Cards --- */
+        .match-card { background: #fff; margin: 15px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 1px solid #ccc; overflow: hidden; transition: 0.2s; }
+        .match-card:active { transform: scale(0.98); }
+        .match-top { display: flex; gap: 12px; padding: 15px; border-bottom: 1px solid #eee;}
+        .match-img { width: 80px; height: 50px; border-radius: 4px; object-fit: cover; }
+        .match-title { font-size: 15px; font-weight: 800; color: #000; }
+        .match-time { font-size: 12px; color: #d32f2f; margin-top: 3px; font-weight: 700;}
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px 10px; text-align: center; padding: 15px; }
+        .stat-item span { display: block; font-size: 11px; color: #333; font-weight: 800; text-transform: uppercase; margin-bottom: 2px;}
+        .stat-item strong { font-size: 14px; color: #000; font-weight: 800;}
+        
+        .progress-container { padding: 0 15px 10px; }
+        .progress-bar { width: 100%; background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden; margin-bottom: 5px; }
+        .progress-fill { background: #00c853; height: 100%; transition: width 0.3s; }
+        .spots-text { display: flex; justify-content: space-between; font-size: 11px; font-weight: 700; color: #111; }
+        
+        .join-btn-small { background: #fff; border: 1px solid #1a237e; color: #1a237e; padding: 6px 20px; border-radius: 4px; font-weight: 800; font-size: 13px; cursor: pointer; transition: 0.2s;}
+        .join-btn-small:active { opacity: 0.7; }
+        .join-btn-small.full { color: #1a237e; border-color: #1a237e; opacity: 0.7; }
+        .join-btn-small.active { background: #1a237e; color: #fff; }
+        
+        .btn-group { display: flex; gap: 10px; padding: 0 15px 15px; }
+        .action-btn { flex: 1; padding: 8px; border: 1px solid #1a237e; background: #fff; color: #1a237e; border-radius: 4px; font-size: 12px; font-weight: 800; display: flex; justify-content: center; align-items: center; gap: 5px; cursor: pointer; transition:0.2s;}
+        .action-btn:active { background: #eee; }
+
+        .timer-bar { background: #388e3c; color: white; text-align: center; padding: 10px; font-size: 14px; font-weight: 800; cursor: pointer; border-top: 1px solid rgba(255,255,255,0.2);}
+        .timer-bar.started { background: #d32f2f; }
+
+        /* --- Profile (Premium VIP Design) --- */
+        .profile-container { padding: 20px; }
+        
+        .profile-header-card { 
+            background: linear-gradient(135deg, rgba(15, 15, 15, 0.95), rgba(35, 35, 35, 0.95)), url('https://img.freepik.com/free-vector/dark-black-background-with-golden-geometric-lines-pattern_1017-38069.jpg') center/cover;
+            border-radius: 15px; padding: 25px 20px; color: #fff; text-align: center; 
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.2); margin-bottom: 20px; 
+            border: 1px solid #d4af37; position: relative; overflow: hidden;
+        }
+        .profile-header-card::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,215,0,0.1), transparent);
+            transform: skewX(-20deg); animation: shimmer 4s infinite;
+        }
+        @keyframes shimmer { 100% { left: 200%; } }
+        
+        .prof-avatar { width: 85px; height: 85px; border-radius: 50%; border: 3px solid #d4af37; margin: 0 auto 10px; object-fit: cover; background: #fff; box-shadow: 0 0 15px rgba(212, 175, 55, 0.5); z-index: 1; position: relative;}
+        .prof-name { font-size: 20px; font-weight: 800; margin-bottom: 4px; color: #fff; text-shadow: 0 2px 4px rgba(0,0,0,0.5); position: relative; z-index: 1;}
+        .prof-username-box { display: inline-flex; align-items: center; gap: 8px; background: linear-gradient(135deg, #d4af37, #f3e5ab, #d4af37); padding: 5px 18px; border-radius: 20px; font-size: 13px; margin-bottom: 8px; color: #000; cursor: pointer; font-weight:800; box-shadow: 0 4px 10px rgba(0,0,0,0.3); position: relative; z-index: 1;}
+        .prof-email { font-size: 13px; color: #ccc; font-weight:600; cursor:pointer; position: relative; z-index: 1;}
+        
+        .profile-options { background: #fff; border-radius: 12px; overflow: hidden; border: 1px solid #ccc; margin-bottom:20px;}
+        .p-option { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; border-bottom: 1px solid #eee; cursor: pointer; position: relative;}
+        .p-option-left { display: flex; align-items: center; gap: 15px; font-size: 14px; font-weight: 700; color: #000; }
+        .p-option-left i { color: #1a237e; width: 20px; text-align: center; font-size: 16px;}
+        
+        /* --- Premium Wallet Screen --- */
+        .vip-wallet-card { 
+            background: linear-gradient(135deg, #1e1e2f 0%, #0d0d1a 100%); 
+            border-radius: 16px; padding: 25px 20px; color: #fff; position: relative; overflow: hidden; 
+            margin-bottom: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1); 
+        }
+        .vip-wallet-card::before {
+            content: ""; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 40%, rgba(255,255,255,0) 50%);
+            transform: rotate(30deg); pointer-events: none;
+        }
+        .wallet-top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .wallet-chip { 
+            width: 45px; height: 32px; background: linear-gradient(135deg, #f6d365 0%, #ffb199 100%); 
+            border-radius: 6px; position: relative; box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        .wallet-chip::after { content:''; position:absolute; top:5px; bottom:5px; left:15px; right:15px; border:1px solid rgba(0,0,0,0.2); border-radius: 2px;}
+        .wallet-bottom-row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 10px; }
+        .visa-logo { font-size: 32px; font-weight: 900; font-style: italic; letter-spacing: -2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        
+        .stat-box { background: #fff; text-align: center; padding: 15px; border-radius: 12px; border: 1px solid #ccc; margin-bottom: 20px;}
+        .wallet-btn-group { display: flex; gap: 10px; margin-bottom: 20px; }
+        .w-btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: 800; color: #fff; cursor: pointer; font-size: 14px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: 0.2s;}
+        .w-btn:active { transform: translateY(2px); box-shadow: none; }
+        .btn-dep { background: #2e7d32; } .btn-with { background: #d32f2f; }
+        
+        /* --- Dynamic Payment --- */
+        .instruction-card { background: #fff; padding: 20px; border-radius: 15px; color: #000; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .pay-input { width:100%; padding:14px; margin-bottom:15px; border-radius:8px; border:1px solid #ccc; font-weight:800; color:#000; font-size:15px; outline:none; text-align:center;}
+
+        /* --- Modals & Toasts --- */
+        .overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 6000; display: none; justify-content: center; align-items: center; padding: 15px;}
+        .modal { background: #fff; width: 100%; max-width: 350px; border-radius: 12px; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.3); position: relative; max-height: 90vh; display: flex; flex-direction: column;}
+        .modal-scroll { overflow-y: auto; padding: 20px; }
+        .close-modal { position: absolute; top: 10px; right: 15px; background: rgba(0,0,0,0.1); border-radius: 50%; width: 25px; height: 25px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; color: #000; font-weight: bold;}
+        .alert-modal { padding: 25px 20px 20px; text-align: center; }
+        
+        /* Join Match Custom Modal */
+        .join-box { background: #fff; width: 100%; border-radius: 12px; padding: 20px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
+        .j-header-text { font-size: 16px; font-weight: 800; color: #333; margin-bottom: 5px; }
+        .j-sub-text { font-size: 11px; color: #777; margin-bottom: 10px; }
+        .j-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: 700; color: #555; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed #ccc;}
+        .j-warn { color: #e65100; font-size: 12px; font-weight: 800; text-align: center; margin-bottom: 15px;}
+        .j-toggles { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
+        .j-mode-btn { padding: 8px 25px; border-radius: 6px; font-weight: 800; font-size: 13px; cursor: pointer; border: 1px solid #ccc; background: #e0e0e0; color: #555; }
+        .j-mode-btn.active { background: #ffca28; border-color: #ffb300; color: #000; }
+        .j-input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 10px; font-size: 14px; font-weight: 600; outline: none; }
+        .j-submit-btn { width: 100%; background: #5e35b1; color: #fff; border: none; padding: 15px; border-radius: 25px; font-weight: 800; font-size: 15px; margin-top: 10px; cursor: pointer; transition: 0.2s;}
+        .j-submit-btn:disabled { background: #9575cd; cursor: not-allowed; }
+
+        /* Total Prize Custom Modal */
+        .prize-modal-container { position: relative; background: #fff; border-radius: 15px; width: 100%; max-width: 320px; margin: 0 auto; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.3); }
+        .close-prize { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: #fff; color: #333; width: 35px; height: 35px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10; font-size: 18px; cursor: pointer; border: 2px solid #ccc;}
+        .prize-header { background: #fbc02d; padding: 25px 15px 15px; border-radius: 15px 15px 0 0; text-align: center; border-bottom: 2px solid #e0a800;}
+        .prize-body { padding: 20px; text-align: center; color: #555; font-weight: 700; line-height: 1.8; font-size: 14px; background: #fff; border-radius: 0 0 15px 15px; }
+
+        /* Rules Tabs */
+        .rules-tabs-wrapper { display: flex; overflow-x: auto; gap: 10px; padding: 15px; background: #fff; border-bottom: 1px solid #eee; }
+        .rules-tabs-wrapper::-webkit-scrollbar { display: none; }
+        .r-tab { white-space: nowrap; padding: 10px 20px; background: #e8eaf6; color: #4527a0; border-radius: 8px; font-weight: 800; font-size: 13px; cursor: pointer; border: 1px solid #d1c4e9; transition:0.2s;}
+        .r-tab.active { background: #ffca28; color: #000; border-color: #ffb300; }
+        .r-content { padding: 20px; font-size: 14px; font-weight: 600; color: #333; line-height: 1.8; }
+
+        /* FAQs Accordion */
+        .faq-item { background: #fff; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 10px; overflow: hidden; }
+        .faq-q { padding: 15px; font-size: 15px; font-weight: 800; color: #1a237e; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .faq-a { padding: 0 15px 15px; font-size: 14px; font-weight: 600; color: #555; line-height: 1.6; display: none; border-top: 1px dashed #eee; margin-top: 5px; padding-top: 10px;}
+
+        /* Toast */
+        #toast { visibility: hidden; min-width: 250px; background-color: #111; color: #fff; text-align: center; border-radius: 50px; padding: 12px; position: fixed; z-index: 9999; left: 50%; bottom: 80px; transform: translateX(-50%); font-size: 14px; font-weight: 700; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+        @keyframes fadein { from { bottom: 50px; opacity: 0; } to { bottom: 80px; opacity: 1; } }
+        @keyframes fadeout { from { bottom: 80px; opacity: 1; } to { bottom: 50px; opacity: 0; } }
+        
+        /* Lists & Items */
+        .history-item { background: #fff; padding: 15px; border-radius: 8px; border: 1px solid #ccc; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+        .h-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+        /* Custom Auth Box */
+        .auth-box { background-color: white; width: 100%; max-width: 400px; padding: 30px 20px; border-radius: 12px; text-align: center; box-shadow: 0 5px 20px rgba(0,0,0,0.1);}
+        .auth-input { width: 100%; padding: 12px; border: 1px solid #999; border-radius: 8px; font-size: 14px; font-weight: 600; color: #000; outline: none; margin-bottom: 15px;}
+        .auth-input:focus { border-color: #1a237e; }
+        .btn-auth { width: 100%; padding: 14px; background-color: #1a237e; color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 800; cursor: pointer; transition: 0.2s;}
+        .btn-auth:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    
+    <!-- Initial Loading Screen (Light Theme) -->
+    <div id="initial-loader">
+        <div class="app-logo-large"><img src="" class="dynamic-app-logo" alt="Logo"></div>
+        <h2 style="color: #1a237e; letter-spacing: 1px; font-weight: 800;" class="dynamic-app-name">KHELO ESPORTS</h2>
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Startup Popup Notice -->
+    <div class="overlay" id="startup-popup" style="z-index: 8000;">
+        <div class="modal alert-modal" style="background: #fff; padding: 30px 20px 20px; max-width: 300px; border-radius: 12px;">
+            <div id="startup-notice-text" style="font-size: 14px; font-weight: 700; color: #333; margin-bottom: 25px; line-height: 1.8; text-align: left;"></div>
+            <button style="background:#e65100; color:#fff; border:none; padding:12px; width:100%; border-radius:30px; font-weight:800; cursor:pointer; font-size: 15px;" onclick="closeModal('startup-popup')">Okay</button>
+        </div>
+    </div>
+
+    <!-- Global Maintenance Screen -->
+    <div id="global-maintenance" class="hidden" style="position: absolute; top:0; left:0; width:100%; height:100%; background:#f4f6f9; z-index:9000; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px;">
+        <div class="app-logo-large"><img src="" class="dynamic-app-logo"></div>
+        <h2 style="color: #1a237e; margin-bottom: 15px; font-weight:800;" class="dynamic-app-name">KHELO ESPORTS</h2>
+        <i class="fas fa-tools" style="font-size: 50px; color: #ff9800; margin-bottom: 20px;"></i>
+        <p style="color: #111; font-size: 18px; font-weight: 800;">অ্যাপ এর কাজ চলছে<br>অনুগ্রহ করে পরে ঢুকুন।</p>
+    </div>
+
+    <!-- Account Blocked Screen -->
+    <div id="blocked-screen" class="hidden" style="position: absolute; top:0; left:0; width:100%; height:100%; background:#f4f6f9; z-index:9999; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; padding:20px;">
+        <div class="app-logo-large" style="box-shadow:none;"><img src="" class="dynamic-app-logo"></div>
+        <h2 style="color: #1a237e; font-weight: 800; margin-bottom: 20px; font-size: 22px;" class="dynamic-app-name">KHELO ESPORTS</h2>
+        <i class="fas fa-user-slash" style="font-size: 50px; color: #ef5350; margin-bottom: 15px;"></i>
+        <h3 style="color: #d32f2f; font-weight: 800; margin-bottom: 10px;">একাউন্ট ব্লকড!</h3>
+        <p id="block-reason-text" style="color: #555; font-size: 14px; font-weight: 700; margin-bottom: 30px; line-height: 1.6;">কোনো নিয়ম ভঙ্গের কারণে আপনার একাউন্ট ব্লক করা হয়েছে।</p>
+        <button style="background:#ef5350; color:#fff; border:none; padding:12px 30px; border-radius:25px; font-weight:800; font-size:15px; cursor:pointer;" onclick="window.confirmLogout()">লগআউট করুন</button>
+    </div>
+
+    <!-- Auth View (Login default) -->
+    <div id="auth-view" class="hidden" style="position: absolute; top:0; left:0; width:100%; height:100%; background:#f3f4f6; z-index:5000; display:flex; justify-content:center; align-items:center; padding:20px; overflow-y:auto;">
+        <div class="auth-box">
+            <img src="" class="dynamic-app-logo" style="width:80px; height:80px; border-radius:10px; margin-bottom:10px; object-fit:contain;">
+            <div style="color: #1a237e; font-weight: 800; font-size: 22px; margin-bottom: 20px;" class="dynamic-app-name">KHELO ESPORTS</div>
+            <div id="auth-forms-container"></div>
+        </div>
+    </div>
+    
+    <!-- 1. HOME VIEW -->
+    <div id="home-view" class="scrollable-content hidden">
+        <div class="slider-wrapper">
+            <div class="slider-container" id="slider-container">
+                <div class="slider" id="slider"></div>
+                <div class="dots" id="dots"></div>
+            </div>
+            <div class="notice-bar"><marquee behavior="scroll" direction="left" id="home-notice" style="color:#000;">Welcome to our platform!</marquee></div>
+        </div>
+        
+        <h2 class="section-title">FREE FIRE</h2>
+        <div class="category-grid" id="home-categories"></div>
+
+        <div class="floating-support" onclick="openSupport()">
+            <img src="https://cdn-icons-png.flaticon.com/512/814/814246.png" alt="Support">
+        </div>
+    </div>
+
+    <!-- 2. MATCH LIST VIEW -->
+    <div id="match-view" class="scrollable-content hidden">
+        <div class="header"><i class="fas fa-chevron-left" onclick="showView('home-view')"></i><span id="match-page-title">MATCHES</span><div style="width:20px;"></div></div>
+        <div id="matches-container"></div>
+    </div>
+
+    <!-- Total Prize Details Modal -->
+    <div class="overlay" id="prize-modal">
+        <div class="modal" style="overflow: visible; background: transparent; box-shadow: none;">
+            <div class="prize-modal-container">
+                <div class="close-prize" onclick="closeModal('prize-modal')"><i class="fas fa-times"></i></div>
+                <div class="prize-header">
+                    <h3 style="color: #000; font-weight: 800; font-size: 18px; margin-bottom: 5px;">TOTAL WINPRIZE</h3>
+                    <p id="prize-modal-subtitle" style="font-size: 12px; color: #444; font-weight: 700;">Match details</p>
+                </div>
+                <div id="prize-modal-body" class="prize-body"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Details/Rules Full Page View -->
+    <div id="match-details-view" class="scrollable-content hidden" style="position:absolute; top:0; left:0; width:100%; background:#fff; z-index:2000;">
+        <div class="header"><i class="fas fa-chevron-left" onclick="showView('match-view')"></i><span>Rules Page</span><div style="width:20px;"></div></div>
+        <div id="md-content" style="padding:15px; color:#111;">Loading...</div>
+    </div>
+
+    <!-- Join Match View -->
+    <div id="join-match-view" class="overlay" style="z-index: 6000; align-items: flex-end; padding:0; background:rgba(0,0,0,0.5);">
+         <div style="background:#f4f6f9; width:100%; height:100%; display:flex; flex-direction:column;">
+             <div class="header" style="background:#f4f6f9; border:none;"><i class="fas fa-chevron-left" onclick="closeJoinMatchScreen()"></i><span></span><div style="width:20px;"></div></div>
+             <div style="padding: 20px; display:flex; justify-content:center; align-items:center; height:100%;">
+                 <div class="join-box">
+                     <div class="j-header-text" id="jc-title">Duo Time | Mobile | Regular</div>
+                     <div class="j-sub-text" id="jc-date">13/07/2024, 10:30 PM</div>
+                     <div class="j-row">
+                         <span>Win Prize: <strong id="jc-win">405TK</strong></span>
+                         <span>Entry Fee: <strong id="jc-fee">20TK</strong></span>
+                     </div>
+                     <div class="j-warn">*অবশ্যই এখানে আপনার গেমের এর নামটি দিয়ে জয়েন করবেন।</div>
+                     <div class="j-toggles" id="mode-toggle-container"></div>
+                     <div id="player-inputs"></div>
+                     <button class="j-submit-btn" id="final-join-btn" onclick="showJoinConfirmation()">Join Now!</button>
+                 </div>
+             </div>
+         </div>
+    </div>
+
+    <!-- Join Confirmation Modal -->
+    <div class="overlay" id="join-confirm-overlay" style="z-index: 6050;">
+        <div style="background:#fff; width:100%; max-width:400px; border-radius:12px; padding:20px; box-shadow:0 5px 20px rgba(0,0,0,0.2);">
+            <h3 id="jc-conf-title" style="color:#333; font-weight:800; margin-bottom:5px; text-transform:uppercase; font-size:16px;">MATCH NAME</h3>
+            <div id="jc-conf-date" style="font-size:12px; color:#777; margin-bottom:15px;">Date</div>
+            <div style="display:flex; justify-content:space-between; font-size:13px; font-weight:700; color:#555; margin-bottom:15px; padding-bottom:10px; border-bottom:1px dashed #ccc;">
+                <span>Win Prize: <strong id="jc-conf-win">0</strong></span>
+                <span>Entry Fee: <strong id="jc-conf-fee">0</strong></span>
+            </div>
+            <div style="color:#e65100; font-size:12px; font-weight:800; margin-bottom:15px; text-align:center;">*অবশ্যই এখানে আপনার গেমের এর নামটি দিয়ে জয়েন করবেন।</div>
+            <div id="jc-conf-players" style="font-size:14px; font-weight:600; color:#333; margin-bottom:20px; line-height:1.6;">
+                <!-- Player Content -->
+            </div>
+            <div style="display:flex; gap:10px;">
+                <button style="flex:1; background:#fff; color:#5e35b1; border:1px solid #5e35b1; padding:12px; border-radius:25px; font-weight:800; font-size:14px; cursor:pointer;" onclick="closeModal('join-confirm-overlay')">Edit Players</button>
+                <button style="flex:1; background:#5e35b1; color:#fff; border:none; padding:12px; border-radius:25px; font-weight:800; font-size:14px; cursor:pointer;" id="jc-conf-btn" onclick="executeJoinMatch()">Confirm and Pay</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Room Details Modal -->
+    <div class="overlay" id="room-details-modal" style="z-index: 7000;">
+        <div class="modal alert-modal" style="padding: 20px; max-width: 320px;">
+            <h3 style="color:#1a237e; font-weight:800; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px; font-size:18px;">রুম ডিটেলস</h3>
+            <div id="room-details-content" style="font-size:14px; font-weight:700; color:#333; margin-bottom:20px; line-height:1.6;">
+                <!-- Content Injected Here -->
+            </div>
+            <div style="display:flex; justify-content:center; gap:15px; margin-top:15px;">
+                <button style="background:#2e7d32; color:#fff; padding:12px 15px; border:none; border-radius:8px; font-weight:800; cursor:pointer; flex:1; font-size:13px;" id="rd-refresh-btn"><i class="fas fa-sync-alt"></i> Refresh</button>
+                <button style="background:#e65100; color:#fff; padding:12px 15px; border:none; border-radius:8px; font-weight:800; cursor:pointer; flex:1; font-size:13px;" onclick="closeModal('room-details-modal')">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. MY MATCH VIEW -->
+    <div id="mymatch-view" class="scrollable-content hidden">
+        <div class="header"><span>MY MATCHES</span></div>
+        <div id="my-matches-container" style="padding: 15px;"></div>
+    </div>
+
+    <!-- 4. TOP PLAYERS VIEW -->
+    <div id="topplayers-view" class="scrollable-content hidden">
+        <div class="header"><span>TOP PLAYERS</span></div>
+        <div class="leaderboard" id="leaderboard-container" style="padding: 15px;"></div>
+    </div>
+
+    <!-- 5. NOTICE VIEW -->
+    <div id="notice-view" class="scrollable-content hidden">
+        <div class="header">
+            <span>NOTICES</span>
+            <i class="fas fa-trash-alt" style="color:#d32f2f; cursor:pointer;" onclick="confirmClearNotices()"></i>
+        </div>
+        <div id="notices-container" style="padding: 15px;">Loading...</div>
+    </div>
+
+    <!-- 6. PROFILE VIEW -->
+    <div id="profile-view" class="scrollable-content hidden">
+        <div class="header"><span>PROFILE</span></div>
+        <div class="profile-container">
+            <div class="profile-header-card">
+                <img src="" class="prof-avatar" id="prof-avatar-img">
+                <div class="prof-name" id="prof-name">Name</div>
+                <div class="prof-username-box" onclick="copyText(document.getElementById('prof-uid').innerText)"><span id="prof-uid">@username</span><i class="far fa-copy"></i></div>
+                <div class="prof-email" id="prof-email" onclick="copyText(this.innerText)">email</div>
+            </div>
+            
+            <div class="profile-options">
+                <div class="p-option" onclick="openWallet()">
+                    <div class="p-option-left"><i class="fas fa-wallet" style="color:#2e7d32;"></i> Wallet (ওয়ালেট)</div>
+                    <i class="fas fa-chevron-right" style="color:#111;"></i>
+                </div>
+                <div class="p-option" onclick="showView('all-rules-view')"><div class="p-option-left"><i class="fas fa-file-alt" style="color:#f57c00;"></i> All Rules (রুলস)</div><i class="fas fa-chevron-right" style="color:#111;"></i></div>
+                <div class="p-option" onclick="showView('our-apps-view')"><div class="p-option-left"><i class="fas fa-th-large" style="color:#8e24aa;"></i> আমাদের অ্যাপ সমূহ</div><i class="fas fa-chevron-right" style="color:#111;"></i></div>
+                <div class="p-option" onclick="showView('refer-view')"><div class="p-option-left"><i class="fas fa-users" style="color:#1976d2;"></i> Refer & Earn</div><i class="fas fa-chevron-right" style="color:#111;"></i></div>
+                <div class="p-option" onclick="showView('faq-view')"><div class="p-option-left"><i class="fas fa-circle-question" style="color:#e67e22;"></i> আপনাদের প্রশ্নগুলো (FAQ)</div><i class="fas fa-chevron-right" style="color:#111;"></i></div>
+                <div class="p-option" onclick="showView('privacy-view')"><div class="p-option-left"><i class="fas fa-user-shield" style="color:#00838f;"></i> My Privacy</div><i class="fas fa-chevron-right" style="color:#111;"></i></div>
+                <div class="p-option" onclick="showView('dev-view')"><div class="p-option-left"><i class="fas fa-code" style="color:#455a64;"></i> Developer Details</div><i class="fas fa-chevron-right" style="color:#111;"></i></div>
+            </div>
+            <button style="width:100%; padding:15px; background:#ffebee; color:#d32f2f; font-weight:800; border:1px solid #ffcdd2; border-radius:12px; cursor:pointer;" onclick="window.confirmLogout()">লগআউট করুন</button>
+        </div>
+    </div>
+
+    <!-- Refer View -->
+    <div id="refer-view" class="scrollable-content hidden" style="position: absolute; top:0; left:0; width:100%; background:#fff; z-index:110;">
+        <div class="header"><i class="fas fa-chevron-left" onclick="showView('profile-view')"></i><span>Refer & Earn</span><div style="width:20px;"></div></div>
+        <div style="padding:30px 20px; text-align:center;">
+            <img src="https://cdn-icons-png.flaticon.com/512/1239/1239281.png" style="width:100px; margin-bottom:20px;">
+            <h3 style="margin-bottom:10px; font-weight:800; color:#000;">Refer Your Friends</h3>
+            <p style="font-size:14px; font-weight:700; color:#333; margin-bottom:20px;">আপনার বন্ধুদের ইনভাইট করুন এবং জিতে নিন বোনাস!</p>
+            <div style="background:#f4f6f9; padding:15px; border-radius:8px; border:1px dashed #111; margin-bottom:20px; font-weight:800; color:#1a237e; word-break:break-all;" id="my-refer-link">Loading...</div>
+            <button class="btn-auth" onclick="copyText(document.getElementById('my-refer-link').innerText)">Copy Link</button>
+        </div>
+    </div>
+
+    <!-- FAQ View -->
+    <div id="faq-view" class="scrollable-content hidden" style="position: absolute; top:0; left:0; width:100%; background:#fff; z-index:110;">
+        <div class="header"><i class="fas fa-chevron-left" onclick="showView('profile-view')"></i><span>FAQ</span><div style="width:20px;"></div></div>
+        <div id="faq-container" style="padding:15px;"></div>
+    </div>
+
+    <!-- WALLET VIEW -->
+    <div id="wallet-view" class="scrollable-content hidden" style="position: absolute; top:0; left:0; width:100%; background:#f4f6f9; z-index:110;">
+        <div class="header"><i class="fas fa-chevron-left" onclick="showView('profile-view')"></i><span>Wallet</span><div style="width:20px;"></div></div>
+        <div style="padding: 20px;">
+            <div class="vip-wallet-card">
+                <div class="wallet-top-row">
+                    <div class="wallet-chip"></div>
+                    <i class="fas fa-wifi" style="font-size:24px; transform: rotate(90deg); opacity: 0.8;"></i>
+                </div>
+                <div style="margin-top: 15px;">
+                    <div style="font-size: 13px; font-weight:800; text-transform: uppercase; letter-spacing: 2px; opacity: 0.8; margin-bottom: 5px;">Total Balance</div>
+                    <h1 style="font-size: 36px; font-weight: 900; margin: 0; letter-spacing: 1px;">৳ <span id="wallet-balance">0.00</span></h1>
+                </div>
+                <div class="wallet-bottom-row">
+                    <div style="font-size: 16px; font-weight:700; letter-spacing: 2px; color: #e2e8f0; cursor:pointer;" id="wallet-uid" onclick="copyText(this.innerText)">@username</div>
+                    <div class="visa-logo">VISA</div>
+                </div>
+            </div>
+            
+            <div class="stat-box"><h4 style="font-weight:800; color:#000;">Total Match Played</h4><p id="wallet-match-count" style="font-weight:900; font-size:22px; color:#1a237e;">0</p></div>
+
+            <div class="wallet-btn-group">
+                <button class="w-btn btn-dep" onclick="openPaymentMethods('deposit')"><i class="fas fa-plus-circle"></i> ডিপোজিট করুন</button>
+                <button class="w-btn btn-with" onclick="openPaymentMethods('withdraw')"><i class="fas fa-minus-circle"></i> উইথড্র করুন</button>
+            </div>
+            <div class="wallet-btn-group">
+                <button class="w-btn" style="background:#444;" onclick="showHistory('my-deposit')"><i class="fas fa-history"></i> Deposit History</button>
+                <button class="w-btn" style="background:#444;" onclick="showHistory('my-withdraw')"><i class="fas fa-history"></i> Withdraw History</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History View -->
+    <div id="history-view" class="scrollable-content hidden" style="position: absolute; top:0; left:0; width:100%; background:#f4f6f9; z-index:120;">
+        <div class="header"><i class="fas fa-chevron-left" onclick="showView('wallet-view')"></i><span id="history-title">History</span><div style="width:20px;"></div></div>
+        <div id="history-container" style="padding: 15px;"></div>
+    </div>
+
+    <!-- All Rules View -->
+    <div id="all-rules-view" class="scrollable-content hidden" style="position: absolute; top:0; left:0; width:100%; background:#fff; z-index:110;">
+        <div class="header"><i class="fas fa-chevron-left" onclick="showView('profile-view')"></i><span>All Rules</span><div style="width:20px;"></div></div>
+        <div class="rules-tabs-wrapper" id="rules-tabs-container"></div>
+        <div class="r-content" id="rules-content-container">Select a rule category from above.</div>
+    </div>
+
+    <!-- Our Apps View -->
+    <div id="our-apps-view" class="scrollable-content hidden" style="position: absolute; top:0; left:0; width:100%; background:#f4f6f9; z-index:110;">
+        <div class="header"><i class="fas fa-chevron-left" onclick="showView('profile-view')"></i><span>আমাদের অ্যাপ সমূহ</span><div style="width:20px;"></div></div>
+        <div id="our-apps-container" style="padding: 15px;"></div>
+    </div>
+
+    <!-- Privacy View -->
+    <div id="privacy-view" class="scrollable-content hidden" style="position: absolute; top:0; left:0; width:100%; background:#fff; z-index:110;">
+        <div class="header"><i class="fas fa-chevron-left" onclick="showView('profile-view')"></i><span>My Privacy</span><div style="width:20px;"></div></div>
+        <div style="padding: 20px;">
+            <div style="text-align:center; margin-bottom:20px;">
+                <img src="" id="priv-avatar-img" style="width:100px; height:100px; border-radius:50%; object-fit:cover; border:3px solid #1a237e; margin-bottom:10px;">
+                <br><button style="background:#fff; border:1px solid #1a237e; color:#1a237e; padding:6px 15px; border-radius:5px; font-weight:800; font-size:12px; cursor:pointer;" onclick="changeProfilePic()">ছবি পরিবর্তন করুন</button>
+                <input type="file" id="pic-input" accept="image/*" style="display:none;" onchange="handlePicUpload(event)">
+            </div>
+            <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px; border:1px solid #ccc;">
+                <label style="font-size:12px; font-weight:800; color:#555;">Name</label><div style="font-weight:800; font-size:16px; color:#000;" id="priv-name">...</div>
+                <label style="font-size:12px; font-weight:800; color:#555; margin-top:10px; display:block;">Email</label><div style="font-weight:800; font-size:16px; color:#000;" id="priv-email">...</div>
+                <label style="font-size:12px; font-weight:800; color:#555; margin-top:10px; display:block;">Username</label><div style="font-weight:800; font-size:16px; color:#000;" id="priv-uid">...</div>
+                <label style="font-size:12px; font-weight:800; color:#555; margin-top:10px; display:block;">Login Password</label>
+                <div style="font-weight:800; font-size:16px; color:#111; display:flex; justify-content:space-between; align-items:center;">
+                    <span id="priv-pass-text">••••••</span>
+                    <i class="fas fa-eye" id="priv-pass-eye" onclick="togglePassView()" style="color:#999; font-size:20px; cursor:pointer;"></i>
+                </div>
+            </div>
+            <h4 style="margin-bottom:10px; color:#1a237e; font-weight:800;">Change Password</h4>
+            <input type="text" id="new-priv-pass" placeholder="Enter New Password (Min 6)" style="width:100%; padding:15px; border:1px solid #111; border-radius:8px; margin-bottom:10px; font-weight:700;">
+            <button style="width:100%; padding:15px; background:#1a237e; color:#fff; border:none; border-radius:8px; font-weight:800; font-size:15px;" onclick="changeMyPassword()">Update Password</button>
+        </div>
+    </div>
+
+    <!-- Developer Details -->
+    <div id="dev-view" class="scrollable-content hidden" style="position: absolute; top:0; left:0; width:100%; background:#fff; z-index:110;">
+        <div class="header"><i class="fas fa-chevron-left" onclick="showView('profile-view')"></i><span>Developer</span><div style="width:20px;"></div></div>
+        <div style="padding: 30px 20px; text-align: center;">
+            <h3 style="color:#d32f2f; font-weight:800; margin-bottom:15px;">♥️ আসসালামু আলাইকুম ♥️</h3>
+            <p style="font-size:15px; font-weight:700; color:#111; line-height:1.6; margin-bottom:25px;">আমাদের সার্ভিস সর্বনিম্ন ৩০০০ টাকা থেকে শুরু তাই এর নিচে বাজেট হলে দয়া করে মেসেজ দিবেন না। আমরাই প্রথম এত কম দামে যেকোনো ধরনের অ্যাপ সেল করছি। নিচের দুটির মধ্যে যেকোনো একটি সিলেক্ট করুন ডেভলপারকে টেলিগ্রামের বেশি একটিভ পাবেন।</p>
+            <div style="display:flex; justify-content:center; gap:20px;">
+                <a href="#" id="dev-tg" style="width:50px; height:50px; background:#0088cc; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; text-decoration:none;"><i class="fab fa-telegram-plane"></i></a>
+                <a href="#" id="dev-wa" style="width:50px; height:50px; background:#25D366; color:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:24px; text-decoration:none;"><i class="fab fa-whatsapp"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Dynamic Payment Screens -->
+    <div id="method-select-screen" class="scrollable-content hidden" style="position: absolute; top:0; left:0; width:100%; background:#f4f6f9; z-index:120;">
+        <div class="header"><i class="fas fa-arrow-left" onclick="showView('wallet-view')"></i><span id="method-screen-title">Select Method</span><div style="width:20px;"></div></div>
+        <div id="dynamic-methods-container" style="padding: 20px;">Loading methods...</div>
+    </div>
+
+    <div id="manual-form-screen" class="scrollable-content hidden" style="position: absolute; top:0; left:0; width:100%; background:#f4f6f9; z-index:130;">
+        <div class="header" style="background: rgba(0,0,0,0.4); border:none; color:#fff; position:absolute; width:100%;"><i class="fas fa-arrow-left" onclick="showView('method-select-screen')"></i><span id="form-screen-title">Payment</span><div style="width:20px;"></div></div>
+        <div style="padding: 70px 20px 20px;" id="form-container-body"></div>
+    </div>
+
+    <!-- Generic Modals & Toasts -->
+    <div class="overlay" id="alert-modal-overlay" style="z-index: 7000;">
+        <div class="modal alert-modal">
+            <div id="alert-icon-container" style="font-size:40px; margin-bottom:10px;"><i class="fas fa-info-circle"></i></div>
+            <h3 id="alert-title" style="font-size: 18px; font-weight:800; margin-bottom: 15px; color:#000;">Title</h3>
+            <p id="alert-desc" style="font-size: 14px; font-weight:700; color: #333; margin-bottom: 25px;">Description</p>
+            <button id="alert-btn" style="background:#ff9800; color:#fff; padding:10px 30px; border:none; border-radius:20px; font-weight:800; cursor:pointer;" onclick="closeModal('alert-modal-overlay')">ঠিক আছে</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="success-screen" style="z-index: 6100;">
+        <div class="modal alert-modal">
+            <div class="app-logo-large" style="width:60px; height:60px; margin:0 auto 10px;"><img src="" class="dynamic-app-logo"></div>
+            <h3 style="color:#1a237e; font-size:18px; font-weight:800;" class="dynamic-app-name">App</h3>
+            <i class="fas fa-check-circle" style="font-size: 50px; color: #27ae60; margin: 15px 0;"></i>
+            <p style="color:#111; font-size:15px; font-weight:800; margin-bottom:20px;" id="success-msg-desc">সফল হয়েছে!</p>
+            <button style="background:#1a237e; color:#fff; padding:10px 30px; border:none; border-radius:20px; font-weight:800;" onclick="closeModal('success-screen'); showView('home-view');">ঠিক আছে</button>
+        </div>
+    </div>
+
+    <div class="overlay" id="confirm-modal" style="z-index: 7000;">
+        <div class="modal alert-modal">
+            <i class="fas fa-exclamation-circle" id="confirm-icon" style="font-size:40px; color:#d32f2f; margin-bottom:15px;"></i>
+            <h3 id="confirm-title" style="margin-bottom:15px; color:#000; font-weight:800; font-size:16px;">আপনি কি নিশ্চিত?</h3>
+            <div style="display:flex; gap:10px;">
+                <button id="confirm-yes-btn" style="flex:1; background:#d32f2f; color:#fff; padding:12px; border:none; border-radius:8px; font-weight:800; font-size:15px;">হ্যাঁ</button>
+                <button style="flex:1; background:#999; color:#fff; padding:12px; border:none; border-radius:8px; font-weight:800; font-size:15px;" onclick="closeModal('confirm-modal')">না</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast">Message</div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav hidden" id="main-bottom-nav">
+        <div class="nav-item active" onclick="switchNav('home-view', this)"><i class="fas fa-store"></i><span>HOME</span></div>
+        <div class="nav-item" onclick="switchNav('mymatch-view', this)"><i class="fas fa-gamepad"></i><span>MY MATCH</span></div>
+        <div class="nav-item" onclick="switchNav('topplayers-view', this)"><i class="fas fa-chart-line"></i><span>TOP PLAYERS</span></div>
+        <div class="nav-item" onclick="openNotices(this)">
+            <i class="fas fa-bell"></i><span>NOTICE</span>
+            <div class="nav-badge" id="nav-notice-badge">0</div>
+        </div>
+        <div class="nav-item" onclick="switchNav('profile-view', this)">
+            <i class="fas fa-user-circle"></i><span>PROFILE</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- Firebase & Logic -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getFirestore, collection, doc, setDoc, updateDoc, onSnapshot, increment, serverTimestamp, query, where, getDocs, addDoc, orderBy, limit, getDoc } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+
+    // IMPORTANT: আপনার আসল ফায়ারবেস কনফিগারেশন এখানে বসান।
+    const firebaseConfig = {
+  apiKey: "AIzaSyCopXEXh058DrJkIexFV09x9e0c92xra38",
+  authDomain: "khelo-e-sports-2.firebaseapp.com",
+  databaseURL: "https://khelo-e-sports-2-default-rtdb.firebaseio.com",
+  projectId: "khelo-e-sports-2",
+  storageBucket: "khelo-e-sports-2.firebasestorage.app",
+  messagingSenderId: "596982272476",
+  appId: "1:596982272476:web:efe56ca3d5023fd1173f19",
+  measurementId: "G-L1S51HH4T5"
+};
+
+    const app = initializeApp(firebaseConfig); 
+    const auth = getAuth(app); const db = getFirestore(app);
+
+    let myUid = null, myUserDoc = null;
+    let allCategories =[], allTournaments =[], myPermanentMatches =[];
+    let appConfigData = {}, serviceStatusMap = {}, dynamicMethods =[], ruleTabsData =[];
+    let currentCatId = null, currentCatImg = "", matchTimerInterval = null;
+
+    window.showToast = (msg) => { const t = document.getElementById("toast"); t.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`; t.className = "show"; setTimeout(() => t.className = t.className.replace("show", ""), 3000); };
+    window.copyText = (txt) => { 
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(txt).then(() => window.showToast("কপি হয়েছে!"));
+        } else {
+            let textArea = document.createElement("textarea");
+            textArea.value = txt;
+            textArea.style.position = "fixed"; textArea.style.left = "-999999px"; textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus(); textArea.select();
+            try { document.execCommand('copy'); window.showToast("কপি হয়েছে!"); } 
+            catch (error) { window.showToast("কপি করা যায়নি!"); }
+            textArea.remove();
+        }
+    };
+    
+    window.showMainAlert = () => {
+        window.showAlert('tools', 'কাজ চলছে!', 'এই ক্যাটাগরির কাজ চলছে, কিছুক্ষন পর আবার চেষ্টা করুন।', '#e65100', 'ঠিক আছে', '#e65100');
+    }
+
+    window.showAlert = (icon, title, desc, col, btnText="ঠিক আছে", btnCol="#ff9800") => { 
+        let ic = document.getElementById('alert-icon-container'); 
+        
+        if(icon==="FF"){ 
+            ic.innerHTML = `<img src="${document.querySelector('.dynamic-app-logo').src}" style="width:100px; border-radius:10px;">`; ic.style.color="transparent"; 
+        } 
+        else if (icon === "info-circle-orange") {
+            ic.innerHTML = `<div style="background:#e65100; color:#fff; width:60px; height:60px; border-radius:50%; display:flex; justify-content:center; align-items:center; margin:0 auto;"><i class="fas fa-info" style="font-size:30px;"></i></div>`;
+        }
+        else { 
+            ic.innerHTML = `<i class="fas fa-${icon}"></i>`; ic.style.color = col||'#1a237e'; 
+        } 
+        
+        document.getElementById('alert-title').innerText = title; 
+        document.getElementById('alert-desc').innerText = desc; 
+        document.getElementById('alert-btn').innerText = btnText;
+        document.getElementById('alert-btn').style.background = btnCol;
+        document.getElementById('alert-modal-overlay').style.display = 'flex'; 
+    }
+    
+    window.closeModal = (id) => document.getElementById(id).style.display = 'none';
+
+    onSnapshot(doc(db, "settings", "appConfig"), (d) => {
+        if(d.exists()) {
+            appConfigData = d.data();
+            let nName = appConfigData.appName || "KHELO ESPORTS"; let nLogo = appConfigData.appLogo || "https://img.freepik.com/premium-vector/esport-gaming-logo-design_139747-1.jpg";
+            document.querySelectorAll('.dynamic-app-name').forEach(el => { el.innerText = nName; if(el.tagName === 'TITLE') document.title = nName; });
+            document.querySelectorAll('.dynamic-app-logo').forEach(el => el.src = nLogo);
+            document.getElementById('home-notice').innerText = appConfigData.notice || `Welcome to ${nName}!`;
+            document.getElementById('dev-tg').href = appConfigData.devTg || "#"; document.getElementById('dev-wa').href = appConfigData.devWa || "#";
+            
+            updateReferLink();
+            checkAndShowPopup();
+        }
+    });
+
+    function checkAndShowPopup() {
+        if (myUid && myUserDoc && myUserDoc.status !== 'blocked' && !myUserDoc.deleted) {
+            let sShown = sessionStorage.getItem('popupShown');
+            if (appConfigData && appConfigData.popupNotice && !sShown) {
+                let formattedText = appConfigData.popupNotice.replace(/\n/g, '<br>');
+                document.getElementById('startup-notice-text').innerHTML = formattedText;
+                document.getElementById('startup-popup').style.display = 'flex';
+                sessionStorage.setItem('popupShown', 'true');
+            }
+        }
+    }
+
+    window.openSupport = () => { if(appConfigData.supportLink) window.open(appConfigData.supportLink, '_blank'); else showToast("Support link not set"); }
+
+    window.switchAuthView = (view) => {
+        const container = document.getElementById('auth-forms-container');
+        if(view === 'login') {
+            container.innerHTML = `<form onsubmit="window.handleLogin(event)"><input type="email" id="loginEmail" class="auth-input" placeholder="Email" required><input type="password" id="loginPass" class="auth-input" placeholder="Password" required><button type="submit" class="btn-auth" id="loginBtn">লগইন করুন</button></form><p class="auth-footer" style="margin-top:10px; font-size:13px; font-weight:700; color:#111;">নতুন একাউন্ট খুলবেন? <span style="color:#1a237e; font-weight:800; cursor:pointer; text-decoration:underline;" onclick="window.switchAuthView('register')">রেজিস্ট্রেশন করুন</span></p>`;
+        } else {
+            container.innerHTML = `<form onsubmit="window.handleRegister(event)"><input type="text" id="regName" class="auth-input" placeholder="Full Name" required><input type="email" id="regEmail" class="auth-input" placeholder="Email" required><input type="tel" id="regPhone" class="auth-input" placeholder="Phone (01...)" required><input type="password" id="regPass" class="auth-input" placeholder="Password (Min 6)" required><button type="submit" class="btn-auth" id="regBtn">সাইন আপ</button></form><p class="auth-footer" style="margin-top:10px; font-size:13px; font-weight:700; color:#111;">একাউন্ট আছে? <span style="color:#1a237e; font-weight:800; cursor:pointer; text-decoration:underline;" onclick="window.switchAuthView('login')">লগইন করুন</span></p>`;
+        }
+    };
+
+    window.handleLogin = async (e) => { 
+        e.preventDefault(); 
+        const btn = document.getElementById('loginBtn'); btn.innerText = "অপেক্ষা করুন..."; 
+        try { 
+            let userCred = await signInWithEmailAndPassword(auth, document.getElementById('loginEmail').value, document.getElementById('loginPass').value); 
+            await updateDoc(doc(db, "users", userCred.user.uid), { isLoggedIn: true });
+        } catch (err) { btn.innerText = "লগইন করুন"; showToast("ভুল ইমেইল বা পাসওয়ার্ড"); } 
+    };
+    
+    window.handleRegister = async (e) => {
+        e.preventDefault(); const name = document.getElementById('regName').value, email = document.getElementById('regEmail').value, phone = document.getElementById('regPhone').value, pass = document.getElementById('regPass').value;
+        if(pass.length < 6) return showToast("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে");
+        const btn = document.getElementById('regBtn'); 
+        let animInt = setInterval(()=>{ btn.innerText = btn.innerText.length>12 ? "অপেক্ষা করুন." : btn.innerText+"."; }, 300);
+        try {
+            const snap = await getDocs(query(collection(db, "users"), where("phone", "==", phone))); if(!snap.empty) { clearInterval(animInt); btn.innerText = "সাইন আপ"; return showToast("নাম্বারটি ব্যবহৃত হয়েছে!"); }
+            
+            let baseName = email.split(/[^a-zA-Z]/)[0];
+            if(!baseName) baseName = "user";
+            let customUserId = `@${baseName.toLowerCase()}-${phone.slice(-4)}`;
+            
+            const userCred = await createUserWithEmailAndPassword(auth, email, pass);
+            await setDoc(doc(db, "users", userCred.user.uid), { uid: userCred.user.uid, name: name, email: email, phone: phone, userId: customUserId, pass: pass, balance: 0, totalPlayMatch: 0, unreadNotifications: 0, status: 'active', isLoggedIn: true, createdAt: serverTimestamp() });
+            clearInterval(animInt);
+        } catch(err) { clearInterval(animInt); btn.innerText = "সাইন আপ"; showToast("এরর: " + err.message); }
+    };
+    
+    window.confirmLogout = () => { 
+        document.getElementById('confirm-icon').className = "fas fa-sign-out-alt";
+        document.getElementById('confirm-title').innerText = "আপনি কি লগ আউট করতে চান?";
+        document.getElementById('confirm-yes-btn').onclick = async () => { 
+            let btn = document.getElementById('confirm-yes-btn');
+            btn.innerText = "অপেক্ষা করুন...";
+            if(myUid) {
+                try { await updateDoc(doc(db, "users", myUid), { isLoggedIn: false }); } catch(e){}
+            }
+            await signOut(auth); 
+            document.getElementById('confirm-modal').style.display = 'none'; 
+            location.reload(); 
+        };
+        document.getElementById('confirm-modal').style.display = 'flex'; 
+    };
+
+    window.confirmClearNotices = () => { 
+        document.getElementById('confirm-icon').className = "fas fa-trash-alt";
+        document.getElementById('confirm-title').innerText = "আপনি কি বার্তাগুলো মুছে দিতে চান?";
+        document.getElementById('confirm-yes-btn').onclick = window.executeClearNotices;
+        document.getElementById('confirm-modal').style.display = 'flex'; 
+    };
+    
+    let isPassVisible = false;
+    window.togglePassView = () => {
+        isPassVisible = !isPassVisible;
+        document.getElementById('priv-pass-text').innerText = isPassVisible ? (myUserDoc.pass || "Not Found") : '••••••';
+        document.getElementById('priv-pass-eye').className = isPassVisible ? 'fas fa-eye-slash' : 'fas fa-eye';
+    }
+
+    window.changeMyPassword = async () => {
+        let newP = document.getElementById('new-priv-pass').value;
+        if(newP.length < 6) return showToast("পাসওয়ার্ড কমপক্ষে ৬ অক্ষরের হতে হবে");
+        try { 
+            await updatePassword(auth.currentUser, newP); 
+            await updateDoc(doc(db, "users", myUid), { pass: newP });
+            showToast("পাসওয়ার্ড পরিবর্তন হয়েছে"); 
+            document.getElementById('new-priv-pass').value = ''; 
+            isPassVisible = false; window.togglePassView(); window.togglePassView(); 
+        } 
+        catch(e) { 
+            if(e.code === 'auth/requires-recent-login' && myUserDoc.pass) {
+                try {
+                    let cred = EmailAuthProvider.credential(myUserDoc.email, myUserDoc.pass);
+                    await reauthenticateWithCredential(auth.currentUser, cred);
+                    await updatePassword(auth.currentUser, newP);
+                    await updateDoc(doc(db, "users", myUid), { pass: newP });
+                    showToast("পাসওয়ার্ড পরিবর্তন হয়েছে"); 
+                    document.getElementById('new-priv-pass').value = ''; 
+                    isPassVisible = false; window.togglePassView(); window.togglePassView();
+                } catch(err) { showToast("Security error: দয়া করে লগআউট করে আবার লগইন করুন।"); }
+            } else {
+                showToast("Error: " + e.message); 
+            }
+        }
+    };
+
+    window.changeProfilePic = () => { document.getElementById('pic-input').click(); }
+    window.handlePicUpload = (e) => {
+        let file = e.target.files[0];
+        if(!file) return;
+        let reader = new FileReader();
+        reader.onload = (ev) => {
+            let img = new Image();
+            img.onload = () => {
+                let canvas = document.createElement('canvas');
+                let ctx = canvas.getContext('2d');
+                let size = 150;
+                canvas.width = size; canvas.height = size;
+                ctx.drawImage(img, 0, 0, size, size);
+                let base64 = canvas.toDataURL('image/jpeg', 0.6); 
+                updateDoc(doc(db, "users", myUid), { profilePic: base64 }).then(()=>{ showToast('ছবি পরিবর্তন হয়েছে!'); });
+            }
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    window.addEventListener('offline', () => showToast("Network Error: No Internet Connection"));
+
+    let loadFailsafe = setTimeout(() => {
+        if(document.getElementById('initial-loader').style.display !== 'none') { 
+            document.getElementById('initial-loader').style.display = 'none'; 
+            showToast("Network Error or Timeout"); 
+            if(!myUserDoc && auth.currentUser) signOut(auth); 
+        }
+    }, 10000);
+
+    onAuthStateChanged(auth, (user) => {
+        if(user) {
+            myUid = user.uid; document.getElementById('auth-view').classList.add('hidden');
+            try {
+                onSnapshot(doc(db, "users", myUid), (d) => {
+                    if(d.exists()) {
+                        clearTimeout(loadFailsafe);
+                        myUserDoc = d.data(); 
+                        
+                        if(myUserDoc.deleted) {
+                            showToast("একাউন্ট ডিলেট করা হয়েছে!");
+                            return signOut(auth);
+                        }
+                        if(myUserDoc.status === 'blocked') {
+                            document.getElementById('initial-loader').style.display = 'none';
+                            document.getElementById('block-reason-text').innerText = myUserDoc.blockReason || "কোনো নিয়ম ভঙ্গের কারণে আপনার একাউন্ট ব্লক করা হয়েছে।";
+                            document.getElementById('app').style.display = 'none';
+                            document.getElementById('blocked-screen').classList.remove('hidden');
+                            return;
+                        }
+
+                        document.getElementById('wallet-balance').innerText = (myUserDoc.balance||0).toFixed(2);
+                        document.getElementById('prof-name').innerText = myUserDoc.name; 
+                        document.getElementById('prof-email').innerText = myUserDoc.email; 
+                        document.getElementById('prof-uid').innerText = myUserDoc.userId; 
+                        document.getElementById('wallet-uid').innerText = myUserDoc.userId;
+                        document.getElementById('priv-name').innerText = myUserDoc.name; 
+                        document.getElementById('priv-email').innerText = myUserDoc.email; 
+                        document.getElementById('priv-uid').innerText = myUserDoc.userId;
+                        document.getElementById('wallet-match-count').innerText = myUserDoc.totalPlayMatch || 0;
+                        
+                        let defPic = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+                        document.getElementById('prof-avatar-img').src = myUserDoc.profilePic || defPic;
+                        document.getElementById('priv-avatar-img').src = myUserDoc.profilePic || defPic;
+
+                        let unread = myUserDoc.unreadNotifications || 0;
+                        let navNoticeBadge = document.getElementById('nav-notice-badge');
+                        if(unread > 0) {
+                            navNoticeBadge.style.display = 'flex'; navNoticeBadge.innerText = unread;
+                        } else {
+                            navNoticeBadge.style.display = 'none';
+                        }
+
+                        updateReferLink(); document.getElementById('initial-loader').style.display = 'none'; document.getElementById('home-view').classList.remove('hidden'); document.getElementById('main-bottom-nav').classList.remove('hidden');
+                        initListeners();
+                        checkAndShowPopup();
+                    } else { clearTimeout(loadFailsafe); signOut(auth); }
+                }, (error) => { clearTimeout(loadFailsafe); alert("ডাটাবেস কানেকশন এরর: " + error.message); signOut(auth); });
+            } catch(e) {
+                clearTimeout(loadFailsafe);
+                showToast("Failed to fetch data!");
+            }
+        } else {
+            clearTimeout(loadFailsafe);
+            document.getElementById('initial-loader').style.display = 'none';
+            document.getElementById('auth-view').classList.remove('hidden');
+            document.getElementById('main-bottom-nav').classList.add('hidden');
+            document.querySelectorAll('.scrollable-content').forEach(e => e.classList.add('hidden'));
+            
+            window.switchAuthView('login');
+        }
+    });
+
+    function updateReferLink() { if(!myUserDoc) return; let appName = (appConfigData && appConfigData.appName) ? appConfigData.appName.replace(/\s+/g, '').toLowerCase() : 'kheloesports'; let userWithoutAt = myUserDoc.userId.replace('@',''); document.getElementById('my-refer-link').innerText = `https://${appName}@${userWithoutAt}`; }
+
+    window.openNotices = (el) => {
+        window.switchNav('notice-view', el);
+        if(myUserDoc.unreadNotifications > 0) {
+            updateDoc(doc(db, "users", myUid), { unreadNotifications: 0 });
+        }
+        loadNoticesData();
+    }
+    
+    window.executeClearNotices = async () => {
+        try {
+            await updateDoc(doc(db, "users", myUid), { clearedNoticesAt: serverTimestamp() });
+            window.closeModal('confirm-modal');
+            window.showToast("নোটিশ মুছে ফেলা হয়েছে!");
+            loadNoticesData();
+        } catch(e) { window.showToast("Error: " + e.message); }
+    }
+
+    function loadNoticesData() {
+        let allNotices =[];
+        let twentyDaysAgo = Date.now() - (20 * 24 * 60 * 60 * 1000);
+        let clearedAtTime = (myUserDoc.clearedNoticesAt) ? myUserDoc.clearedNoticesAt.toMillis() : 0;
+
+        getDocs(query(collection(db, "notices"), where("target", "==", myUserDoc.userId))).then(snap => {
+            snap.forEach(d => allNotices.push({id: d.id, ...d.data()}));
+            getDocs(query(collection(db, "notices"), where("target", "==", "all"))).then(snap2 => {
+                snap2.forEach(d => allNotices.push({id: d.id, ...d.data()}));
+                
+                let filteredNotices = allNotices.filter(n => {
+                    if(!n.createdAt) return true;
+                    let nTime = n.createdAt.toMillis();
+                    return (nTime > twentyDaysAgo) && (nTime > clearedAtTime);
+                });
+
+                filteredNotices.sort((a,b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
+                
+                let html = "";
+                filteredNotices.forEach(n => {
+                    let dStr = n.createdAt ? new Date(n.createdAt.toMillis()).toLocaleString() : "Recent";
+                    html += `<div style="background:#fff; padding:15px; border-radius:8px; margin-bottom:10px; border:1px solid #eee;">
+                        <div style="font-size:15px; font-weight:800; color:#1a237e; margin-bottom:5px;">${n.title}</div>
+                        <div style="font-size:13px; color:#333; line-height:1.5; font-weight:600;">${n.body}</div>
+                        <div style="font-size:10px; color:#999; margin-top:8px; text-align:right; font-weight:700;">${dStr}</div>
+                    </div>`;
+                });
+                document.getElementById('notices-container').innerHTML = html || "<p class='no-data' style='text-align:center; padding:20px; font-weight:800;'>কোন নোটিশ নেই</p>";
+            });
+        });
+    }
+
+    window.openWallet = () => { window.loadWalletData(); window.showView('wallet-view'); }
+    window.loadWalletData = () => { if(myUserDoc) document.getElementById('wallet-balance').innerText = (myUserDoc.balance||0).toFixed(2); };
+
+    function initListeners() {
+        onSnapshot(doc(db, "settings", "serviceStatus"), (d) => { if(d.exists()) { serviceStatusMap = d.data(); if(serviceStatusMap['global_app'] === false) document.getElementById('global-maintenance').classList.remove('hidden'); else document.getElementById('global-maintenance').classList.add('hidden'); window.renderMatchesList(); } });
+        
+        onSnapshot(collection(db, "sliders"), (snap) => { let sHtml = "", dHtml = ""; let idx = 0; snap.forEach(doc => { let s = doc.data(); sHtml += `<div class="slide" style="background-image: url('${s.image}');" data-link="${s.link||''}"></div>`; dHtml += `<div class="dot ${idx===0?'active':''}"></div>`; idx++; }); document.getElementById('slider').innerHTML = sHtml; document.getElementById('dots').innerHTML = dHtml; setupSliderLogic(); });
+        
+        onSnapshot(collection(db, "faqs"), (snap) => { 
+            let fHtml = ""; let idx=0;
+            snap.forEach(d => { 
+                let f = d.data(); 
+                fHtml += `
+                <div class="faq-item">
+                    <div class="faq-q" onclick="toggleFAQ(${idx})"><span>${f.q}</span> <i class="fas fa-chevron-down" style="font-size:12px; color:#999;"></i></div>
+                    <div class="faq-a" id="faq-ans-${idx}">${f.a}</div>
+                </div>`; 
+                idx++;
+            }); 
+            document.getElementById('faq-container').innerHTML = fHtml || "<p class='no-data' style='text-align:center; font-weight:800;'>কোন প্রশ্ন নেই</p>"; 
+        });
+        
+        onSnapshot(collection(db, "ruleTabs"), (snap) => { 
+            ruleTabsData = snap.docs.map(x=>({id:x.id, ...x.data()})); 
+            renderRuleTabs();
+        });
+        
+        onSnapshot(collection(db, "paymentMethods"), (snap) => { dynamicMethods = snap.docs.map(x=>({id:x.id, ...x.data()})); });
+        onSnapshot(collection(db, "ourApps"), (snap) => { 
+            let html = ""; snap.forEach(d=>{ let a = d.data(); html+=`<div style="background:#fff; padding:15px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; border:1px solid #ccc;"><strong style="color:#000; font-weight:800;">${a.name}</strong><button style="background:#1a237e; color:#fff; padding:8px 15px; border:none; border-radius:5px; font-weight:800; font-size:12px;" onclick="window.open('${a.link}','_blank')">লিংকে যান</button></div>`;}); 
+            document.getElementById('our-apps-container').innerHTML = html || "<p class='no-data' style='text-align:center; font-weight:800;'>কোন অ্যাপ নেই</p>"; 
+        });
+
+        onSnapshot(collection(db, `users/${myUid}/myMatches`), (snap) => { myPermanentMatches = snap.docs.map(d=>d.data()); window.renderMyMatches(); });
+        onSnapshot(collection(db, "categories"), (snap) => { allCategories =[]; snap.forEach(doc => { allCategories.push({ id: doc.id, ...doc.data() }); }); renderHomeCategories(); });
+        onSnapshot(collection(db, "tournaments"), (snap) => { allTournaments =[]; snap.forEach(doc => { allTournaments.push({ id: doc.id, ...doc.data() }); }); renderHomeCategories(); if(currentCatId) window.renderMatchesList(); });
+        
+        // TOP PLAYERS FUNCTION LOADED HERE
+        loadTopPlayers();
+    }
+
+    window.toggleFAQ = (idx) => {
+        let el = document.getElementById('faq-ans-'+idx);
+        el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function renderRuleTabs() {
+        let tabsHtml = "";
+        ruleTabsData.forEach((r, i) => {
+            tabsHtml += `<div class="r-tab ${i===0?'active':''}" id="r-tab-btn-${i}" onclick="selectRuleTab(${i})">${r.title}</div>`;
+        });
+        document.getElementById('rules-tabs-container').innerHTML = tabsHtml;
+        if(ruleTabsData.length > 0) selectRuleTab(0);
+    }
+    window.selectRuleTab = (idx) => {
+        document.querySelectorAll('.r-tab').forEach(e=>e.classList.remove('active'));
+        let btn = document.getElementById('r-tab-btn-'+idx);
+        if(btn) btn.classList.add('active');
+        if(ruleTabsData[idx]) {
+            document.getElementById('rules-content-container').innerHTML = ruleTabsData[idx].desc.replace(/\n/g, '<br>');
+        }
+    }
+
+    function setupSliderLogic() {
+        const slider = document.getElementById('slider'), dots = document.querySelectorAll('.dot'); if(!slider || dots.length===0) return;
+        let cIdx = 0, intvl;
+        
+        const updateDots = () => { 
+            dots.forEach(d=>d.classList.remove('active')); 
+            if(dots[cIdx]) dots[cIdx].classList.add('active'); 
+        };
+
+        const next = () => { 
+            cIdx = (cIdx + 1) % dots.length; 
+            slider.scrollTo({ left: cIdx * slider.clientWidth, behavior: 'smooth' });
+        };
+        
+        slider.addEventListener('scroll', () => {
+            let index = Math.round(slider.scrollLeft / slider.clientWidth);
+            if(cIdx !== index && index < dots.length) { cIdx = index; updateDots(); }
+        }, {passive: true});
+
+        const play = () => { clearInterval(intvl); intvl = setInterval(next, 3000); };
+        
+        slider.addEventListener('touchstart', () => clearInterval(intvl), {passive: true});
+        slider.addEventListener('touchend', () => play(), {passive: true});
+        
+        slider.addEventListener('click', e => { let trg = e.target.closest('.slide'); if(trg && trg.dataset.link) window.open(trg.dataset.link, '_blank'); });
+        play();
+    }
+    
+    // --- UPDATED TOP PLAYERS LOGIC ---
+    async function loadTopPlayers() {
+        // Fetch up to 50 active users by balance to allow filtering on client side without index errors
+        const snap = await getDocs(query(collection(db, "users"), where("balance", ">", 0), orderBy("balance", "desc"), limit(50)));
+        let html = ''; 
+        let activePlayers =[];
+        
+        snap.forEach((d) => {
+            let p = d.data();
+            // Filter out logged out or deleted users
+            if(p.isLoggedIn === true && p.deleted !== true) {
+                activePlayers.push(p);
+            }
+        });
+        
+        // Ensure we only show top 20 valid active players max
+        activePlayers = activePlayers.slice(0, 20);
+
+        if(activePlayers.length === 0) {
+            html = `<div class="no-data" style="text-align:center; padding:20px; font-weight:800; color:#111;">No Players Found</div>`;
+        } else {
+            activePlayers.forEach((p, indexCount) => { 
+                let rank = indexCount === 0 ? '🥇' : indexCount === 1 ? '🥈' : indexCount === 2 ? '🥉' : `${indexCount + 1}.`; 
+                html += `<div style="display: flex; align-items: center; background: #fff; padding: 12px 15px; border-radius: 10px; margin-bottom: 10px; border:1px solid #ccc;"><div style="width: 35px; font-size: 16px; font-weight: 800; color: #000;">${rank}</div><div style="flex-grow: 1; font-size: 15px; font-weight: 800; color: #000;">${p.name}</div><div style="font-size: 14px; font-weight: 800; color: #00c853;">${p.balance.toFixed(2)} TK</div></div>`; 
+            });
+        }
+        document.getElementById('leaderboard-container').innerHTML = html;
+    }
+
+    function renderHomeCategories() {
+        let cHtml = ""; allCategories.forEach(c => { let count = allTournaments.filter(m => m.categoryId === c.id).length; cHtml += `<div class="cat-card" onclick="window.openMatches('${c.id}', '${c.name}', '${c.image}')"><img src="${c.image}"><div class="cat-info"><h3>${c.name}</h3><p>${count} matches found</p></div></div>`; }); document.getElementById('home-categories').innerHTML = cHtml;
+    }
+
+    window.openMatches = (catId, catName, catImg) => { 
+        currentCatId = catId; currentCatImg = catImg; 
+        window.showView('match-view'); 
+        document.getElementById('match-page-title').innerText = catName.toUpperCase(); 
+        window.renderMatchesList(); 
+    }
+    
+    window.renderMatchesList = () => { 
+        const cont = document.getElementById('matches-container'); cont.innerHTML = ''; 
+        if(!currentCatId) return;
+        let catMatches = allTournaments.filter(m => m.categoryId === currentCatId); 
+        
+        let isCatOff = serviceStatusMap[`cat_${currentCatId}`] === false;
+        let isAppOff = serviceStatusMap['global_app'] === false;
+        let maintenanceBlock = isCatOff || isAppOff;
+
+        if(catMatches.length===0) return cont.innerHTML = '<div class="no-data" style="text-align:center; padding:30px;"><i class="fas fa-gamepad" style="font-size:40px; margin-bottom:15px; color:#aaa;"></i><p style="font-weight:800; color:#111;">No Match Found</p></div>'; 
+        
+        catMatches.forEach(m => { 
+            let pList = m.participants ||[]; let me = pList.find(p => p.uid === myUid && !p.isFake);
+            let joinedCount = pList.reduce((acc, p) => acc + (p.count||1), 0); 
+            let totalP = m.totalPlayers || 48;
+            let isFull = joinedCount >= totalP; let prog = (joinedCount / totalP) * 100; 
+            let spotsLeft = totalP - joinedCount;
+            
+            let btnAction = maintenanceBlock ? "event.stopPropagation(); showMainAlert()" : `event.stopPropagation(); window.openJoinMatchScreen('${m.id}')`;
+            let roomAction = maintenanceBlock ? "event.stopPropagation(); showMainAlert()" : `event.stopPropagation(); window.checkRoom('${m.id}')`;
+            let prizeAction = maintenanceBlock ? "event.stopPropagation(); showMainAlert()" : `event.stopPropagation(); window.openPrizeDetails('${m.id}')`;
+            let rulesAction = maintenanceBlock ? "showMainAlert()" : `window.openMatchDetailsView('${m.id}')`;
+
+            let btnHtml = me ? `<button class="join-btn-small active" onclick="event.stopPropagation();">Joined</button>` : isFull ? `<button class="join-btn-small full" onclick="event.stopPropagation();">Match Full</button>` : `<button class="join-btn-small" onclick="${btnAction}">Join Now</button>`; 
+            
+            cont.innerHTML += `
+                <div class="match-card" style="cursor:pointer;" onclick="${rulesAction}">
+                    <div class="match-top"><img src="${currentCatImg}" class="match-img"><div><div class="match-title">${m.name}</div><div class="match-time">${m.date}</div></div></div>
+                    <div class="stats-grid">
+                        <div class="stat-item"><span>WIN PRIZE</span><strong>${m.winPrize} TK</strong></div>
+                        <div class="stat-item"><span>ENTRY TYPE</span><strong>${m.type}</strong></div>
+                        <div class="stat-item"><span>ENTRY FEE</span><strong>${m.entryFee} TK</strong></div>
+                        <div class="stat-item"><span>PER KILL</span><strong>${m.perKill} TK</strong></div>
+                        <div class="stat-item"><span>MAP</span><strong>${m.map}</strong></div>
+                        <div class="stat-item"><span>VERSION</span><strong>${m.version||'MOBILE'}</strong></div>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar"><div class="progress-fill" style="width:${prog}%;"></div></div>
+                        <div class="spots-text"><span>Only ${spotsLeft} spots are left</span><span>${joinedCount}/${totalP}</span></div>
+                    </div>
+                    <div style="padding: 0 15px 15px; display:flex; justify-content:flex-end;">
+                        ${btnHtml}
+                    </div>
+                    <div class="btn-group">
+                        <div class="action-btn" onclick="${roomAction}"><i class="fas fa-key"></i> Room Details <i class="fas fa-chevron-down" style="font-size:10px;"></i></div>
+                        <div class="action-btn" onclick="${prizeAction}"><i class="fas fa-trophy"></i> Total Prize Details <i class="fas fa-chevron-down" style="font-size:10px;"></i></div>
+                    </div>
+                    
+                    <div class="timer-bar" id="timer-${m.id}">
+                        <div id="timer-text-${m.id}">Loading...</div>
+                    </div>
+                </div>`; 
+        }); 
+        startLiveTimers();
+    }
+
+    function startLiveTimers() {
+        if(matchTimerInterval) clearInterval(matchTimerInterval);
+        matchTimerInterval = setInterval(() => {
+            allTournaments.forEach(m => {
+                let el = document.getElementById(`timer-${m.id}`); if(!el) return;
+                let textEl = document.getElementById(`timer-text-${m.id}`);
+                
+                let me = (m.participants||[]).find(p=>p.uid===myUid && !p.isFake);
+                if(!m.startTimeMillis) { textEl.innerHTML = "Time Not Set"; return; }
+                let diff = m.startTimeMillis - Date.now();
+                if(diff <= 0) { 
+                    el.classList.add('started'); 
+                    textEl.innerHTML = me ? "কাস্টম Ready Room Details থেকে নিন" : "MATCH STARTED"; 
+                    if(!me) el.style.background = "#d32f2f"; 
+                } else { 
+                    el.classList.remove('started'); 
+                    let h = Math.floor(diff / 3600000), min = Math.floor((diff % 3600000) / 60000), sec = Math.floor((diff % 60000) / 1000); 
+                    textEl.innerHTML = `<i class="far fa-clock"></i> STARTS IN - ${h>0?h+'h:':''}${min<10?'0':''}${min}m:${sec<10?'0':''}${sec}s`; 
+                }
+            });
+        }, 1000);
+    }
+
+    window.openPrizeDetails = (mId) => {
+        let m = allTournaments.find(x => x.id === mId); if(!m) return;
+        document.getElementById('prize-modal-subtitle').innerText = `${m.type} | ${m.version||'MOBILE'} | ${m.map}`;
+        let defaultPrizeText = `👑 Winner - ${m.winPrize} Taka\n🔥 Per Kill : ${m.perKill} Taka\n🏆 Total Prize Pool: ${m.winPrize} Taka`;
+        let pText = m.prizeDetails || defaultPrizeText;
+        document.getElementById('prize-modal-body').innerHTML = pText.replace(/\n/g, '<br>');
+        document.getElementById('prize-modal').style.display = 'flex';
+    }
+
+    window.openMatchDetailsView = (mId) => {
+        let m = allTournaments.find(x => x.id === mId); if(!m) return;
+        let pHtml = "";
+        if(m.hidePlayers) { 
+            pHtml = "<div style='color:#d32f2f; font-weight:800; margin-top:10px; text-align:center;'>এই ম্যাচে অ্যাডমিন প্লেয়ার লিস্ট দেখার অপশন বন্ধ করেছে।</div>"; 
+        } else { 
+            let idx=1; 
+            (m.participants||[]).forEach(p => { 
+                let marks = p.count > 1 ? " !! " : "";
+                pHtml += `<div style="font-size:14px; font-weight:800; padding:10px; border-bottom:1px solid #ccc; color:#000;">${idx}. ${p.gameId}${marks}</div>`; 
+                idx++; 
+            }); 
+        }
+
+        let rulesText = m.rules ? m.rules.replace(/\n/g, '<br>') : "No specific rules";
+        let dHtml = `
+            <h3 style="color:#000; font-weight:800; margin-bottom:15px; border-bottom:2px solid #1a237e; display:inline-block; padding-bottom:5px;">${m.name}</h3>
+            <div style="display:flex; flex-wrap:wrap; gap:10px; margin-bottom:25px;">
+                <span style="border:1px solid #ccc; padding:6px 12px; border-radius:5px; font-weight:800; font-size:12px; color:#111;">Type: ${m.type}</span>
+                <span style="border:1px solid #ccc; padding:6px 12px; border-radius:5px; font-weight:800; font-size:12px; color:#111;">Version: ${m.version||'MOBILE'}</span>
+                <span style="border:1px solid #ccc; padding:6px 12px; border-radius:5px; font-weight:800; font-size:12px; color:#111;">Map: ${m.map}</span>
+                <span style="border:1px solid #ccc; padding:6px 12px; border-radius:5px; font-weight:800; font-size:12px; color:#111;">Match Type: Paid</span>
+                <span style="border:1px solid #ccc; padding:6px 12px; border-radius:5px; font-weight:800; font-size:12px; color:#111;">Entry fee: ${m.entryFee} TK</span>
+                <span style="border:1px solid #ccc; padding:6px 12px; border-radius:5px; font-weight:800; font-size:12px; color:#111;">Schedule: ${m.date}</span>
+            </div>
+            <div style="background:#ff9800; color:#fff; font-weight:800; padding:12px; text-align:center; border-radius:8px; margin-bottom:25px; border:1px dashed #fff; box-shadow:0 2px 5px rgba(0,0,0,0.1);">Room details will be shared before 5-10 minutes of match start time.</div>
+            <h3 style="color:#000; font-weight:800; margin-bottom:15px; text-align:center;">Match Instructions and Rules</h3>
+            <div style="font-size:14px; color:#111; font-weight:700; line-height:1.7; margin-bottom:30px; background:#f9f9f9; padding:15px; border-radius:8px; border:1px solid #ddd;">${rulesText}</div>
+            <h3 style="color:#000; font-weight:800; border-bottom:1px dashed #000; padding-bottom:10px; text-align:center;">Registered Participants</h3>
+            <div style="margin-top:15px; background:#fdfdfd; border-radius:8px; border:1px solid #eee;">${pHtml||'<p style="font-size:14px; font-weight:800; text-align:center; padding:15px; color:#555;">No players joined yet</p>'}</div>
+        `;
+        document.getElementById('md-content').innerHTML = dHtml; 
+        window.showView('match-details-view');
+    }
+
+    let targetMatch = null, selMode = 'Solo', dynFee = 0, selMul = 1;
+    
+    window.openJoinMatchScreen = (mId) => { 
+        targetMatch = allTournaments.find(m => m.id === mId); 
+        document.getElementById('jc-title').innerText = `${targetMatch.type} Time | ${targetMatch.version||'Mobile'} | ${targetMatch.map}`;
+        document.getElementById('jc-date').innerText = targetMatch.date;
+        document.getElementById('jc-win').innerText = targetMatch.winPrize + "TK"; 
+        
+        const modeCont = document.getElementById('mode-toggle-container'); 
+        if(targetMatch.type === 'Solo') modeCont.innerHTML = `<div class="j-mode-btn active" onclick="window.setJMode('Solo')">Solo</div>`; 
+        else if(targetMatch.type === 'Duo') modeCont.innerHTML = `<div class="j-mode-btn active" id="btn-solo" onclick="window.setJMode('Solo')">Solo</div><div class="j-mode-btn" id="btn-duo" onclick="window.setJMode('Duo')">Duo</div>`; 
+        else modeCont.innerHTML = `<div class="j-mode-btn active" id="btn-solo" onclick="window.setJMode('Solo')">Solo</div><div class="j-mode-btn" id="btn-duo" onclick="window.setJMode('Duo')">Duo</div><div class="j-mode-btn" id="btn-squad" onclick="window.setJMode('Squad')">Squad</div>`; 
+        
+        window.setJMode('Solo'); 
+        document.getElementById('join-match-view').style.display = 'flex'; 
+    }
+    
+    window.closeJoinMatchScreen = () => document.getElementById('join-match-view').style.display = 'none';
+    
+    window.setJMode = (mode) => { 
+        selMode = mode; 
+        document.querySelectorAll('.j-mode-btn').forEach(b => b.classList.remove('active')); 
+        let b = document.getElementById('btn-'+mode.toLowerCase()); if(b) b.classList.add('active'); 
+        selMul = mode==='Solo'?1 : mode==='Duo'?2 : 4; 
+        dynFee = targetMatch.entryFee * selMul; 
+        document.getElementById('jc-fee').innerText = dynFee + "TK"; 
+        let inpHtml = ''; 
+        for(let i=1; i<=selMul; i++) inpHtml += `<input type="text" id="pname-${i}" class="j-input" placeholder="Player ${i} Name">`; 
+        document.getElementById('player-inputs').innerHTML = inpHtml; 
+    }
+    
+    window.showJoinConfirmation = () => {
+        let names =[]; 
+        for(let i=1; i<=selMul; i++) { 
+            let v = document.getElementById(`pname-${i}`).value.trim(); 
+            if(!v) return window.showAlert("FF", "নাম প্রয়োজন", "দয়া করে সব খেলোয়াড়ের গেম নেম দিন।", "#c0392b"); 
+            names.push(v); 
+        } 
+        
+        if(myUserDoc.balance < dynFee) {
+            return showToast(`💰 Low Balance! আপনার প্রয়োজন ৳${dynFee} কিন্তু আপনার ব্যালেন্স ৳${myUserDoc.balance.toFixed(2)}`);
+        }
+        
+        document.getElementById('jc-conf-title').innerText = targetMatch.name || `${targetMatch.type} Match`;
+        document.getElementById('jc-conf-date').innerText = targetMatch.date;
+        document.getElementById('jc-conf-win').innerText = targetMatch.winPrize + "TK";
+        document.getElementById('jc-conf-fee').innerText = dynFee + "TK";
+
+        let pHtml = "";
+        names.forEach((n, idx) => { pHtml += `Player ${idx+1}: <span style="color:#5e35b1;">${n}</span><br>`; });
+        document.getElementById('jc-conf-players').innerHTML = pHtml;
+        
+        window.tempJoinNames = names;
+        
+        let btn = document.getElementById('jc-conf-btn');
+        btn.disabled = false; btn.innerText = "Confirm and Pay";
+        
+        document.getElementById('join-confirm-overlay').style.display = 'flex';
+    }
+
+    window.executeJoinMatch = async () => { 
+        let names = window.tempJoinNames;
+        let btn = document.getElementById('jc-conf-btn');
+        btn.disabled = true; btn.innerText = "Processing...";
+
+        try {
+            await updateDoc(doc(db, "users", myUid), { balance: increment(-dynFee), totalPlayMatch: increment(1) }); 
+            let pData = { uid: myUid, username: myUserDoc.name, gameId: names.join(', '), mode: selMode, feePaid: dynFee, count: selMul, isFake: false, joinTime: new Date().toISOString() }; 
+            let parts = targetMatch.participants ||[]; parts.push(pData); 
+            await updateDoc(doc(db, "tournaments", targetMatch.id), { participants: parts }); 
+            await addDoc(collection(db, `users/${myUid}/myMatches`), { matchId: targetMatch.id, name: targetMatch.name, date: targetMatch.date, mode: selMode, feePaid: dynFee, joinedAt: serverTimestamp() });
+            
+            closeModal('join-confirm-overlay');
+            window.closeJoinMatchScreen(); 
+            document.getElementById('success-msg-desc').innerText = "আপনি সফলভাবে ম্যাচে জয়েন হয়েছেন।";
+            document.getElementById('success-screen').style.display = 'flex';
+        } catch(e) {
+            btn.disabled = false; btn.innerText = "Confirm and Pay";
+            showToast("Error joining match.");
+        }
+    }
+
+    window.checkRoom = (mId) => { 
+        let m = allTournaments.find(x => x.id === mId); 
+        let isJ = (m.participants||[]).find(p=>p.uid===myUid && !p.isFake); 
+        
+        if(!isJ) {
+            return window.showAlert("info-circle-orange", "ম্যাচে জয়েন করুন", "আপনি এই ম্যাচে জয়েন করেননি", "#e65100", "ঠিক আছে", "#e65100");
+        } 
+        
+        window.renderRoomDetailsContent(m);
+        document.getElementById('room-details-modal').style.display = 'flex'; 
+    }
+
+    window.renderRoomDetailsContent = (m) => {
+        let cont = document.getElementById('room-details-content');
+        if(m.showRoom && m.roomId) {
+            cont.innerHTML = `
+                <div style="background:#f4f6f9; padding:15px; border-radius:8px; border:1px dashed #1a237e; text-align:center;">
+                    <div style="margin-bottom:15px;">
+                        <span style="font-size:12px; color:#555; text-transform:uppercase;">Room ID</span><br>
+                        <span style="font-size:20px; font-weight:900; color:#1a237e; cursor:pointer;" onclick="copyText('${m.roomId}')">${m.roomId}</span>
+                        <i class="far fa-copy" style="color:#777; cursor:pointer; margin-left:5px;" onclick="copyText('${m.roomId}')"></i>
+                    </div>
+                    <div>
+                        <span style="font-size:12px; color:#555; text-transform:uppercase;">Password</span><br>
+                        <span style="font-size:20px; font-weight:900; color:#d32f2f; cursor:pointer;" onclick="copyText('${m.roomPass}')">${m.roomPass||'No Pass'}</span>
+                        <i class="far fa-copy" style="color:#777; cursor:pointer; margin-left:5px;" onclick="copyText('${m.roomPass}')"></i>
+                    </div>
+                </div>
+            `;
+        } else {
+            cont.innerHTML = `<div style="color:#e65100; font-weight:800; font-size:15px; padding:10px; text-align:center;">ম্যাচ শুরুর ৫-১০ মিনিট আগে রুম আইডি এবং পাসওয়ার্ড পাবেন।</div>`;
+        }
+        document.getElementById('rd-refresh-btn').onclick = () => window.refreshRoomDetails(m.id);
+    }
+
+    window.refreshRoomDetails = async (mId) => {
+        let btn = document.getElementById('rd-refresh-btn');
+        btn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> Loading...`;
+        try {
+            const mDoc = await getDoc(doc(db, "tournaments", mId));
+            if(mDoc.exists()) {
+                let m = {id: mDoc.id, ...mDoc.data()};
+                let idx = allTournaments.findIndex(x=>x.id===mId);
+                if(idx !== -1) allTournaments[idx] = m;
+                renderRoomDetailsContent(m);
+            }
+        } catch(e) { showToast("Network Error"); }
+        setTimeout(() => { btn.innerHTML = `<i class="fas fa-sync-alt"></i> Refresh`; }, 500);
+    }
+    
+    window.renderMyMatches = () => { let cont = document.getElementById('my-matches-container'); if(myPermanentMatches.length === 0) return cont.innerHTML = `<div class="no-data" style="text-align:center; padding:30px;"><i class="fas fa-folder-open" style="font-size:40px; margin-bottom:15px; color:#aaa;"></i><p style="font-weight:800; color:#111;">NO MATCH FOUND</p></div>`; let html = ''; [...myPermanentMatches].reverse().forEach(m => { let dStr = m.joinedAt ? new Date(m.joinedAt.toMillis()).toLocaleString() : m.date; html += `<div class="history-item" style="border:1px solid #111; display:block;"><div style="display:flex; justify-content:space-between; margin-bottom:8px; border-bottom:1px solid #eee; padding-bottom:5px;"><strong style="color:#000; font-weight:800; font-size:15px;">${m.name}</strong><div style="font-weight:800; color:#1a237e; font-size:14px;">${m.mode}</div></div><div style="display:flex; justify-content:space-between; font-size:12px; font-weight:800; color:#333;"><div>Time: ${dStr}</div><div>Entry Fee: <span style="color:#d32f2f;">${m.feePaid} TK</span></div></div></div>`; }); cont.innerHTML = html; }
+
+    let pType = "", pMethodObj = null;
+    window.openPaymentMethods = (type) => { pType = type; document.getElementById('method-screen-title').innerText = type==='deposit'?"ডিপোজিট":"উইথড্র"; let html = ""; if(dynamicMethods.length===0) html="<p class='no-data' style='text-align:center; font-weight:800; color:#111;'>No methods added by admin</p>"; else { dynamicMethods.forEach(m => { html += `<div style="background:#fff; border-left: 5px solid ${m.color||'#ccc'}; padding:15px; border-radius:8px; margin-bottom:10px; display:flex; align-items:center; gap:15px; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.1); border-right:1px solid #ccc; border-top:1px solid #ccc; border-bottom:1px solid #ccc;" onclick="openDynamicForm('${m.id}')"><img src="${m.logo}" style="width:40px; height:40px; object-fit:contain;"><h4 style="font-weight:800; color:#000;">${m.name}</h4></div>`; }); } document.getElementById('dynamic-methods-container').innerHTML = html; window.showView('method-select-screen'); }
+    
+    window.openDynamicForm = (mId) => {
+        pMethodObj = dynamicMethods.find(x=>x.id===mId); window.showView('manual-form-screen');
+        const sc = document.getElementById('manual-form-screen'); sc.className = "scrollable-content";
+        sc.style.backgroundColor = pMethodObj.color || "#1a237e";
+        
+        let cont = document.getElementById('form-container-body');
+        if(pType === 'deposit') {
+            document.getElementById('form-screen-title').innerText = "ডিপোজিট করুন";
+            let mColor = pMethodObj.color || '#e91e63';
+            cont.innerHTML = `
+                <div class="instruction-card">
+                    <img src="${pMethodObj.logo}" style="height:50px; margin:0 auto 15px; display:block; object-fit:contain;">
+                    <div style="background:${mColor}; color:#fff; font-weight:800; padding:10px; border-radius:5px; margin-bottom:10px; text-align:center;">Transaction ID দিন</div>
+                    <input type="text" id="trans-input" class="pay-input" placeholder="Transaction ID">
+                    
+                    <div style="background:${mColor}; color:#fff; text-align:left; border-radius:8px; overflow:hidden; margin-bottom:20px; box-shadow:0 4px 8px rgba(0,0,0,0.2);">
+                        <div style="padding:12px 15px; border-bottom:1px solid rgba(255,255,255,0.2); font-weight:800; font-size:13px;">• *247# ডায়াল করে আপনার ${pMethodObj.name} মোবাইল মেনুতে যান অথবা ${pMethodObj.name} অ্যাপে যান।</div>
+                        <div style="padding:12px 15px; border-bottom:1px solid rgba(255,255,255,0.2); font-weight:800; font-size:13px;">• "Send Money" -এ ক্লিক করুন।</div>
+                        <div style="padding:12px 15px; border-bottom:1px solid rgba(255,255,255,0.2); font-weight:800; font-size:13px;">
+                            • প্রাপক নম্বর হিসেবে এই নম্বরটি লিখুনঃ<br>
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px; background:rgba(0,0,0,0.2); padding:8px 10px; border-radius:5px;">
+                                <span style="color:#ffeb3b; cursor:pointer; font-size:16px; letter-spacing:1px;" onclick="copyText('${pMethodObj.number}')">${pMethodObj.number}</span>
+                                <button onclick="copyText('${pMethodObj.number}')" style="background:#fff; border:none; color:#000; padding:6px 12px; border-radius:5px; font-weight:800; cursor:pointer;"><i class="far fa-copy"></i> Copy</button>
+                            </div>
+                        </div>
+                        <div style="padding:12px 15px; border-bottom:1px solid rgba(255,255,255,0.2); font-weight:800; font-size:13px;">• টাকার পরিমাণঃ আপনার পছন্দমত</div>
+                        <div style="padding:12px 15px; border-bottom:1px solid rgba(255,255,255,0.2); font-weight:800; font-size:13px;">• নিশ্চিত করতে এখন আপনার ${pMethodObj.name} মোবাইল মেনু পিন লিখুন।</div>
+                        <div style="padding:12px 15px; font-weight:800; font-size:13px;">• এখন উপরের বক্সে আপনার Transaction ID দিন এবং VERIFY বাটনে ক্লিক করুন।</div>
+                    </div>
+                    <button style="width:100%; padding:15px; background:${mColor}; color:#fff; border:none; border-radius:8px; font-weight:900; font-size:16px; cursor:pointer;" onclick="window.submitPay()">VERIFY</button>
+                </div>
+            `;
+        } else {
+            document.getElementById('form-screen-title').innerText = "টাকা উত্তোলন করুন";
+            let mColor = pMethodObj.color || '#d32f2f';
+            cont.innerHTML = `
+                <div class="instruction-card">
+                    <div style="text-align:center; margin-bottom:20px;">
+                        <img src="${pMethodObj.logo}" style="height:50px; margin:0 auto 10px; display:block; object-fit:contain;">
+                        <h3 style="margin-bottom:5px; font-weight:800; color:#000;">${pMethodObj.name} উইথড্র</h3>
+                        <p style="font-size:13px; font-weight:800; color:#d32f2f;">মিনিমাম উইথড্র ${appConfigData.minWithdraw||100} টাকা</p>
+                    </div>
+                    <label style="color: #111; font-weight:800; font-size:14px; margin-bottom:8px; display:block; text-align:left;">অ্যামাউন্ট (Amount)</label>
+                    <input type="number" id="trans-amount" class="pay-input" placeholder="কত টাকা?">
+                    <label style="color: #111; font-weight:800; font-size:14px; margin-bottom:8px; display:block; text-align:left;">আপনার নম্বর</label>
+                    <input type="number" id="trans-input" class="pay-input" placeholder="Number">
+                    <button style="width:100%; padding:15px; background:${mColor}; color:#fff; border:none; border-radius:8px; font-weight:900; font-size:16px; cursor:pointer; margin-top:10px;" onclick="window.submitPay()">উইথড্র পাঠান</button>
+                </div>
+            `;
+        }
+    }
+
+    window.submitPay = async () => { 
+        if(pType === 'deposit') { 
+            let trx = document.getElementById('trans-input').value.trim(); 
+            if(!trx) return showToast("Transaction ID দিন"); 
+            if(trx.length !== 10) return window.showAlert("i", "ভুল আইডি!", "Transaction ID অবশ্যই ১০ অক্ষরের হতে হবে।", "#d32f2f", "ঠিক আছে", "#d32f2f");
+            
+            await addDoc(collection(db, "deposits"), { userUid: myUid, idUsername: myUserDoc.userId, method: pMethodObj.name, trxId: trx, amount: 0, status: 'pending', createdAt: serverTimestamp() }); 
+            document.getElementById('success-msg-desc').innerText="ডিপোজিট রিকোয়েস্ট পাঠানো হয়েছে।"; document.getElementById('success-screen').style.display = 'flex'; 
+        } else { 
+            let amt = parseFloat(document.getElementById('trans-amount').value), acc = document.getElementById('trans-input').value.trim(), minW = appConfigData.minWithdraw || 100; 
+            if(!amt || !acc) return showToast("সব তথ্য দিন"); 
+            if(amt < minW) return showToast(`মিনিমাম উইথড্র ${minW} টাকা`); 
+            if(amt > myUserDoc.balance) return window.showAlert("FF", "Insufficient Balance", "পর্যাপ্ত ব্যালেন্স নেই।", "#c0392b", "ঠিক আছে", "#c0392b"); 
+            
+            await updateDoc(doc(db, "users", myUid), { balance: increment(-amt) }); 
+            await addDoc(collection(db, "withdrawals"), { userUid: myUid, method: pMethodObj.name, account: acc, amount: amt, status: 'pending', createdAt: serverTimestamp() }); 
+            document.getElementById('success-msg-desc').innerText="উইথড্র রিকোয়েস্ট পাঠানো হয়েছে।"; document.getElementById('success-screen').style.display = 'flex'; 
+        } 
+    }
+
+    window.showHistory = async (type) => {
+        window.showView('history-view'); let cont = document.getElementById('history-container'); cont.innerHTML = "<div style='text-align:center; font-weight:800;'>Loading...</div>";
+        if(type === 'my-deposit') { document.getElementById('history-title').innerText = "My Deposits"; let snap = await getDocs(query(collection(db, "deposits"), where("userUid", "==", myUid))); renderHistList(snap, 'deposit'); }
+        else if(type === 'my-withdraw') { document.getElementById('history-title').innerText = "My Withdraws"; let snap = await getDocs(query(collection(db, "withdrawals"), where("userUid", "==", myUid))); renderHistList(snap, 'withdraw'); }
+    }
+    
+    function renderHistList(snap, t) { 
+        let html=""; 
+        let sorted =[];
+        snap.forEach(d => sorted.push({id: d.id, ...d.data()}));
+        sorted.sort((a,b) => (b.createdAt?.toMillis()||0) - (a.createdAt?.toMillis()||0));
+
+        sorted.forEach(x => { 
+            let col = x.status==='paid'?'#00c853': x.status==='rejected'?'#d32f2f': x.status==='checking'?'#29b6f6': '#fbc02d'; 
+            let statusText = x.status.charAt(0).toUpperCase() + x.status.slice(1);
+            let timeStr = x.createdAt ? new Date(x.createdAt.toMillis()).toLocaleString() : 'Recent';
+            
+            html+=`<div class="history-item">
+                <div>
+                    <strong style="color:#000; font-weight:800;">${x.method}</strong>
+                    <div style="font-size:11px; color:#555; font-weight:700;">${timeStr}</div>
+                </div>
+                <div style="text-align:right;">
+                    ${x.amount>0?`<div style="font-size:15px; font-weight:800; color:#111;">৳${x.amount}</div>`:''}
+                    <div style="font-weight:800; color:${col}; font-size:13px; display:flex; align-items:center; justify-content:flex-end;">
+                        <span class="h-dot" style="background-color:${col};"></span> ${statusText}
+                    </div>
+                </div>
+            </div>`; 
+        }); 
+        document.getElementById('history-container').innerHTML = html||"<p class='no-data' style='text-align:center; font-weight:800; color:#111;'>No data</p>"; 
+    }
+
+    const mainViews =['home-view', 'match-view', 'mymatch-view', 'topplayers-view', 'notice-view', 'profile-view', 'wallet-view', 'history-view', 'all-rules-view', 'our-apps-view', 'privacy-view', 'dev-view', 'refer-view', 'faq-view', 'method-select-screen', 'manual-form-screen', 'match-details-view'];
+    window.switchNav = (v, el) => { document.querySelectorAll('.nav-item').forEach(e => e.classList.remove('active')); if(el) el.classList.add('active'); window.showView(v); }
+    window.showView = (v) => { mainViews.forEach(id => { let e = document.getElementById(id); if(e) e.classList.add('hidden'); }); let t = document.getElementById(v); if(t) t.classList.remove('hidden'); }
+</script>
+</body>
+</html>
